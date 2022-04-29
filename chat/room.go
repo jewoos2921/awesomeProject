@@ -1,6 +1,7 @@
 package main
 
 import (
+	"awesomeProject/trace"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -16,6 +17,8 @@ type room struct {
 	leave chan *client
 	// clients는 현재 채팅방에 있는 모든 클라이언트를 보유한다
 	clients map[*client]bool
+	// tracer는 방 안에서 활동의 추적 정보를 수신한다.
+	tracer trace.Tracer
 }
 
 func NewRoom() *room {
@@ -24,6 +27,7 @@ func NewRoom() *room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		tracer:  trace.Off(),
 	}
 }
 func (r *room) run() {
@@ -32,14 +36,18 @@ func (r *room) run() {
 		case client := <-r.join:
 			// 입장
 			r.clients[client] = true
+			r.tracer.Trace("New Client joined")
 		case client := <-r.leave:
 			// 퇴장
 			delete(r.clients, client)
 			close(client.send)
+			r.tracer.Trace("Client left")
 		case msg := <-r.forward:
-			// 모든 클라이언트에게 메시지 달
+			r.tracer.Trace("Message received: ", string(msg))
+			// 모든 클라이언트에게 메시지 전달
 			for client := range r.clients {
 				client.send <- msg
+				r.tracer.Trace(" -- sent to client")
 			}
 		}
 	}

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"awesomeProject/trace"
 	"flag"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 )
@@ -26,11 +28,15 @@ func main() {
 	flag.Parse()
 
 	r := NewRoom()
+	r.tracer = trace.New(os.Stdout)
+
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	http.Handle("/room", r)
+
 	go r.run()
+
 	log.Println("Starting web server on", *addr)
 	if err := http.ListenAndServe(*addr, nil); err != nil {
-		log.Fatalf("ListenAndServe: ", err)
+		log.Fatal("ListenAndServe: ", err)
 	}
 }
