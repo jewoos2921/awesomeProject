@@ -1,12 +1,12 @@
 package synonyms
 
 import (
+	"awesomeProject/domainfinder/lib/thesaurus"
 	"bufio"
 	"fmt"
 	"log"
 	"os"
 )
-import "awesomeProject/thesaurus"
 
 func main() {
 	apiKey := os.Getenv("BHT_APIKEY")
