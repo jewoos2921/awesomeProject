@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
+	"path"
 )
 
 // ErrNoAvatarURL는 Avatar 인스턴스가 아바타 URL를 제공할 수 없을 때 리턴되는 에러
@@ -45,10 +47,22 @@ type FileSystemAvatar struct{}
 
 var UseFileSystemAvatar FileSystemAvatar
 
+// 다양한 파일 형식 지원
 func (FileSystemAvatar) GetAvatarURL(c *client) (string, error) {
 	if userid, ok := c.userData["userid"]; ok {
 		if useridStr, ok := userid.(string); ok {
-			return "/avatar/" + useridStr + ".jpg", nil
+			files, err := ioutil.ReadDir("avatars")
+			if err != nil {
+				return "", ErrNoAvatarURL
+			}
+			for _, file := range files {
+				if file.IsDir() {
+					continue
+				}
+				if match, _ := path.Match(useridStr+"*", file.Name()); match {
+					return "/avatar/" + file.Name(), nil
+				}
+			}
 		}
 	}
 
