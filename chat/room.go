@@ -20,19 +20,16 @@ type room struct {
 	clients map[*client]bool
 	// tracer는 방 안에서 활동의 추적 정보를 수신한다.
 	tracer trace.Tracer
-	// 아바타 정보를 얻는 방법이다.
-	avatar Avatar
 }
 
 // 준비된 새 채팅방을 만든다.
-func NewRoom(avatar Avatar) *room {
+func NewRoom() *room {
 	return &room{
 		forward: make(chan *message),
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
 		tracer:  trace.Off(),
-		avatar:  avatar,
 	}
 }
 func (r *room) run() {
