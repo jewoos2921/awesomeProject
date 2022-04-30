@@ -49,7 +49,7 @@ func main() {
 		google.New("key", "secret",
 			"http://localhost:8080/auth/callback/google"))
 
-	r := NewRoom(UseGravatar)
+	r := NewRoom(UseFileSystemAvatar)
 	r.tracer = trace.New(os.Stdout)
 
 	http.Handle("/", MathAuth(&templateHandler{filename: "chat.html"}))
@@ -69,6 +69,11 @@ func main() {
 		w.Header().Set("Location", "/chat")
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	})
+
+	http.Handle("/upload", &templateHandler{filename: "upload.html"})
+	http.HandleFunc("/uploader", UploaderHandler)
+	http.Handle("/avatar", http.StripPrefix("/avatar/",
+		http.FileServer(http.Dir("./avatars"))))
 
 	go r.run()
 
