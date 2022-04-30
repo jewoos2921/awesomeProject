@@ -16,7 +16,10 @@ import (
 	"sync"
 )
 
-var avatars Avatar = UseFileSystemAvatar
+// 슬라이스에 나타나는 순서대로 객체를 반복하므로, 순서가 중요
+var avatars Avatar = TryAvatars{
+	UseFileSystemAvatar, UseAuthAvatar, UseGravatar,
+}
 
 type templateHandler struct {
 	once     sync.Once
