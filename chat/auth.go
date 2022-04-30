@@ -14,6 +14,7 @@ type authHandler struct {
 
 func (h *authHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	_, err := r.Cookie("auth")
+	//if cookie, err := r.Cookie("auth"); err == http.ErrNoCookie || cookie.Value == ""
 	if err == http.ErrNoCookie {
 		// 인증 불가
 		w.Header().Set("Location", "/login")
@@ -53,6 +54,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 				provider, err), http.StatusInternalServerError)
 			return
 		}
+
 		w.Header().Set("Location", loginUrl)
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	case "callback":
@@ -74,7 +76,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		authCookieValue := objx.New(map[string]interface{}{
-			"name": user.Name(),
+			"name":       user.Name(),
+			"avatar_url": user.AvatarURL(),
 		}).MustBase64()
 		http.SetCookie(w, &http.Cookie{Name: "auth", Value: authCookieValue, Path: "/"})
 		w.Header().Set("Location", "/chat")

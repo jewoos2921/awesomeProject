@@ -58,6 +58,17 @@ func main() {
 	http.Handle("/room", r)
 	http.Handle("/assets/", http.StripPrefix("/assets",
 		http.FileServer(http.Dir("/path/to/assets/"))))
+	http.HandleFunc("/logout", func(w http.ResponseWriter, r *http.Request) {
+		http.SetCookie(w, &http.Cookie{
+			Name:  "auth",
+			Value: "",
+			Path:  "/",
+			// 브라우저에서 즉시 삭제
+			MaxAge: -1,
+		})
+		w.Header().Set("Location", "/chat")
+		w.WriteHeader(http.StatusTemporaryRedirect)
+	})
 
 	go r.run()
 
